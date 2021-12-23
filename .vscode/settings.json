@@ -1,0 +1,13 @@
+{
+  "editor.bracketPairColorization.enabled": true,
+  "editor.formatOnSave": true,
+  "prettier.printWidth": 80,
+  "prettier.singleQuote": true,
+  "prettier.tabWidth": 2,
+  "prettier.bracketSpacing": true,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true,
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": true
+}
