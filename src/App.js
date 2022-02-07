@@ -1,41 +1,85 @@
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Users from './components/users/Users';
+import User from './components/users/User';
 import Search from './components/users/Search';
+import About from './components/pages/About';
+import Alert from './components/layout/Alert';
 import axios from 'axios';
 import './App.css';
 
 class App extends Component {
   state = {
     users: [],
+    user: {},
     loading: false,
+    alert: null,
   };
 
-  searchUsers = async (text) => {
+  searchUsers = async text => {
     this.setState({ loading: true });
     const response = await axios.get(
-      `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+      `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`,
     );
     this.setState({ users: response.data.items, loading: false });
   };
 
+  getUser = async username => {
+    this.setState({ loading: true });
+
+    const res = await axios.get(
+      `https://api.github.com/users/${username}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`,
+    );
+
+    this.setState({ user: res.data, loading: false });
+  };
+
   clearUsers = () => this.setState({ users: [], loading: false });
 
+  setAlert = (msg, type) => {
+    this.setState({ alert: { msg, type } });
+    setTimeout(() => {
+      this.setState({ alert: null });
+    }, 2000);
+  };
+
   render() {
-    const { users, loading } = this.state;
+    const { user, users, loading } = this.state;
 
     return (
-      <div className='App'>
-        <Navbar title='GitHub Finder' />
-        <div className='container'>
-          <Search
-            searchUsers={this.searchUsers}
-            clearUsers={this.clearUsers}
-            showClear={users.length > 0}
-          />
-          <Users loading={loading} users={users} />
+      <Router>
+        <div className='App'>
+          <Navbar title='GitHub Finder' />
+          <div className='container'>
+            <Routes>
+              <Route
+                exact
+                path='/'
+                element={
+                  <Fragment>
+                    <Alert alert={this.state.alert} />
+                    <Search
+                      searchUsers={this.searchUsers}
+                      clearUsers={this.clearUsers}
+                      showClear={users.length > 0}
+                      setAlert={this.setAlert}
+                    />
+                    <Users loading={loading} users={users} />
+                  </Fragment>
+                }
+              />
+              <Route exact path='/about' element={<About />}></Route>
+              <Route
+                exact
+                path='/user/:login'
+                element={
+                  <User getUser={this.getUser} user={user} loading={loading} />
+                }></Route>
+            </Routes>
+          </div>
         </div>
-      </div>
+      </Router>
     );
   }
 }
